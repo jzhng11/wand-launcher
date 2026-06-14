@@ -403,8 +403,10 @@ def syncwemod(
             log(
                 f"Directory '{WeModData}' is empty, but '{WeModExternal}' has data. Moving data from external to central."
             )
-            # WeModData already exists (created earlier), so directly copy into it.
-            shutil.copytree(WeModExternal, WeModData)
+            # WeModData already exists (created earlier), so merge into it.
+            # copytree refuses an existing dest unless dirs_exist_ok is set,
+            # which previously raised "[Errno 17] File exists".
+            shutil.copytree(WeModExternal, WeModData, dirs_exist_ok=True)
         else:
             # Either WeModExternal has no content, or WeModData already has content and is preferred.
             log(

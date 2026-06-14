@@ -607,6 +607,24 @@ def unpack_zip_with_progress(zip_path: str, dest_path: str) -> None:
     except Exception as e:
         log(f"failed to set permissions on '{dest_path}': {str(e)}")
 
+    # The prefix zip deliberately omits pfx/dosdevices (see the ignore list in
+    # copy_folder_with_progress), but Proton's setup_prefix() assumes it exists
+    # and crashes on os.symlink("../drive_c", ".../dosdevices/c:") if it's missing.
+    # Recreate the standard dosdevices symlinks so the prefix is launchable.
+    try:
+        dosdevices = os.path.join(dest_path, "pfx", "dosdevices")
+        if os.path.isdir(os.path.join(dest_path, "pfx", "drive_c")):
+            os.makedirs(dosdevices, exist_ok=True)
+            for link_name, target in (("c:", "../drive_c"), ("z:", "/")):
+                link_path = os.path.join(dosdevices, link_name)
+                if not os.path.islink(link_path):
+                    if os.path.exists(link_path):
+                        os.remove(link_path)
+                    os.symlink(target, link_path)
+            log(f"Ensured dosdevices symlinks exist in '{dosdevices}'")
+    except Exception as e:
+        log(f"failed to create dosdevices in '{dest_path}': {str(e)}")
+
     # Check for critical extraction errors
     if extraction_errors:
         log(f"Encountered {len(extraction_errors)} errors during extraction")
