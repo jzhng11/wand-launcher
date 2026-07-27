@@ -25,7 +25,6 @@ from coreutils import (
     cache,
     exit_with_message,
     log,
-    monitor_file,
     popup_options,
     script_manager,
     show_message,
@@ -1044,22 +1043,6 @@ def run(skip_init: bool = False) -> str:
         + LAUNCH_OPTIONS
     )
 
-    ttfile = os.path.join(SCRIPT_PATH, ".cache", "early.tmp")
-    returnfile = os.path.join(SCRIPT_PATH, ".cache", "return.tmp")
-
-    os.makedirs(os.path.dirname(ttfile), exist_ok=True)
-
-    ttime = open(ttfile, "w")
-    ttime.write("")
-    ttime.close()
-
-    log(f"Creating a game time tracking file, the file is:\n\t{ttfile}")
-
-    ttime_thread = threading.Thread(
-        target=monitor_file, args=(ttfile, tout, returnfile)
-    )
-    ttime_thread.start()
-
     # Log the final command
     log(f"Executing:\n\t{FINAL}\n")
     print(f"Executing:\n\t{FINAL}\n")
@@ -1166,12 +1149,6 @@ def run(skip_init: bool = False) -> str:
             log("Finished regular mode code")
 
     log("At this point, the game should have already finished running")
-    if os.path.exists(ttfile):
-        log("Deleting early game tracking file")
-        os.remove(ttfile)
-
-    log("Waiting for early game tracking thread to finish")
-    ttime_thread.join()
 
     troubleshooter()
 

@@ -361,7 +361,6 @@ def check_flatpak(flatpak_cmd: Optional[List[str]]) -> List[str]:
             "SCANFOLDER",
             "TROUBLESHOOT",
             "WEMOD_LOG",
-            "WAIT_ON_GAMECLOSE",
             "SELF_UPDATE",
             "FORCE_UPDATE_WEMOD",
             "REPO_STRING",

@@ -356,69 +356,6 @@ def pip(command: str, venv_path: Optional[str] = None) -> int:
     return process.returncode
 
 
-def monitor_file(
-    ttfile: str, tout: int, responsefile: str, bout: Optional[int] = 60
-):
-    import time
-
-    cout = os.getenv("WAIT_ON_GAMECLOSE")
-    if not cout:
-        cout = load_conf_setting("WaitOnGameclose")
-    if cout:
-        if cout.lower() == "none" or cout.lower() == "false":
-            bout = None
-        else:
-            try:
-                bout = int(cout)
-            except Exception as e:
-                pass
-
-    for _ in range(tout):
-        time.sleep(1)
-        if not os.path.exists(ttfile):
-            time.sleep(1)
-            bat_respond(responsefile, bout)
-            return
-    if os.path.exists(ttfile):
-        os.remove(ttfile)
-    time.sleep(1)
-    if bat_respond(responsefile, bout):
-        log("Finished early game close detention")
-    else:
-        log(
-            "The game ran long enough, wemod is now allowed to close on game exit, therefore early game close detention is finished"
-        )
-
-
-def bat_respond(responsefile: str, bout: Optional[int]) -> Optional[bool]:
-    if os.path.isfile(responsefile):
-        log("Detected abrupt game closure. User should select what they want")
-        returnmessage = read_file(responsefile)
-        if bout != None:
-            batresp = show_message(
-                returnmessage
-                + f'\nYou can still use wemod by clicking "Yes",\nthis will keep wemod open in the backround\nIf you want to close WeMod click "No"\nWeMod will automaticly close in {bout} seconds, if nothing is done',
-                "BAT Warning",
-                bout,
-                True,
-            )
-            log(
-                f"The user selected {batresp} after being asked to wait longer for WeMod"
-            )
-        if bout == None or batresp == "Yes":
-            show_message(
-                returnmessage
-                + '\nClick "OK" ONLY if you are ready to close WeMod\nTo KEEP it open, just minimize THIS message box.',
-                "BAT Warning",
-                None,
-                False,
-            )
-            log("The user accepted to close WeMod")
-        os.remove(responsefile)
-        return True
-    return None
-
-
 # Function to handle caching of files
 def cache(
     file_path: str, default: Callable[[str], None], simple: bool = False

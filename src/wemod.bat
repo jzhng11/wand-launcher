@@ -10,7 +10,6 @@ IF "%mypath:~-5%" == "\src\" (
     SET wemodpath=%mypath:~0,-1%\wemod_data\wemod_bin\%wemodname%
 )
 
-SET temptime=%mypath:~0,-1%\.cache\early.tmp
 SET returnfile=%mypath:~0,-1%\.cache\return.tmp
 
 echo Hello from the WeMod Launcher, the WeMod bat was started successfully.
@@ -65,24 +64,6 @@ echo The full command is: %*
 start /wait "" %*
 echo.
 echo The game was closed.
-
-if defined wemodPID (
-    if exist %temptime% (
-        del %temptime%
-        echo Game closed too fast, Game detection may have failed. > %returnfile%
-        echo Keep in mind that wemod-launcher usually can`t detect game launchers. >> %returnfile%
-        echo Only open an issue IF the game did not start, >> %returnfile%
-        echo or IF the game crashed, or IF WeMod exits unexpectedly. >> %returnfile%
-        type %returnfile%
-        :WaitUser
-        @ping localhost -n 2 >NUL
-        if exist %returnfile% GOTO WaitUser
-    )
-    echo Closing WeMod..
-    C:/windows/system32/taskkill.exe /PID %wemodPID% /F >NUL
-    C:/windows/system32/taskkill.exe /PID %wemodPID% /F >NUL
-    echo Killed %wemodname% with pid %wemodPID%
-)
 
 echo.
 echo Done running bat, closing in 1 second
